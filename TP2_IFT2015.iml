@@ -7,5 +7,19 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../../../../../Java/stanford-corenlp-4.5.1" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../../../../Java/stanford-corenlp-4.5.1" />
+          <root url="file://$MODULE_DIR$/../../../../../Java/stanford-corenlp-4.5.1" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/../../../../../Java/stanford-corenlp-4.5.1" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../../../../Java/stanford-corenlp-4.5.1" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
   </component>
 </module>
