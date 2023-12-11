@@ -17,6 +17,10 @@ public class Main {
 
         System.out.println(processFilesText(dir));
 
+        for (String text : processFilesText(dir)){
+            bigramme(text);
+        }
+
     }
 
     static List<String> processFilesText(String dir) throws IOException{
@@ -72,5 +76,25 @@ public class Main {
             }
         }
         return processedTexts;
+    }
+
+    //TODO : Faire fonctionner la fonction pour realiser les bigrammes
+    static void bigramme(String text){
+        // set up pipeline properties
+        Properties props = new Properties();
+        // set the list of annotators to run
+        props.setProperty("annotators", "tokenize,pos,lemma");
+        // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
+        props.setProperty("coref.algorithm", "neural");
+        // build pipeline
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+        // create a document object
+        CoreDocument document = new CoreDocument(text);
+        // annnotate the document
+        pipeline.annotate(document);
+        //System.out.println(document.tokens());
+        for (CoreLabel tok : document.tokens()) {
+            System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
+        }
     }
 }
