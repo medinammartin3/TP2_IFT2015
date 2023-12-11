@@ -1,5 +1,6 @@
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +41,8 @@ public class Main {
                     // set a property for an annotator, in this case the coref
                     // annotator is being set to use the neural algorithm
                     props.setProperty("coref.algorithm", "neural");
+                    // Delete red lines on excecution
+                    RedwoodConfiguration.current().clear().apply();
                     // build pipeline
                     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
                     // create a document object
