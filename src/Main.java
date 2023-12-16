@@ -11,16 +11,19 @@ import java.util.List;
 import java.util.Properties;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
 
         String dir = "Inputs";
+        try {
+            List<String> processedText = processFilesText(dir);
+            System.out.println(processedText);
 
-        System.out.println(processFilesText(dir));
-
-        for (String text : processFilesText(dir)){
-            bigramme(text);
+            for (String text : processedText){
+                bigramme(text);
+            }
+        } catch (IOException e){
+            e.printStackTrace();
         }
-
     }
 
     static List<String> processFilesText(String dir) throws IOException{
@@ -66,19 +69,16 @@ public class Main {
                 str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
 
                 processedTexts.add(str);
-
                 // now str is a string which has the content of the read file but it is
                 // processed and their words are space-separated. However there maybe some
                 // details which has not been cleaned very well, just follow these steps to
                 // clean the text.
                 // in the following you can continue your own implementation
-
             }
         }
         return processedTexts;
     }
 
-    //TODO : Faire fonctionner la fonction pour realiser les bigrammes
     static void bigramme(String text){
         // set up pipeline properties
         Properties props = new Properties();
@@ -93,8 +93,8 @@ public class Main {
         // annnotate the document
         pipeline.annotate(document);
         //System.out.println(document.tokens());
-        for (CoreLabel tok : document.tokens()) {
-            System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
+        for (int i = 0; i<document.tokens().size()-1; i++) {
+            System.out.printf("%s\t%s%n", document.tokens().get(i).word(), document.tokens().get(i+1).word());
         }
     }
 }
