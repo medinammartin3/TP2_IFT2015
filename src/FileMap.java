@@ -1,12 +1,11 @@
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
+import java.util.LinkedList;
 
-public abstract class FileMap <K,V> implements Map <ArrayList<String>, ArrayList<ArrayList<int>>>{
+public class FileMap<K,V> implements Map<K,V>{
     protected int n = 0; // number of entries in the map
     protected int capacity; // size of the table
-    private LinkedList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>>[] table;
+    private LinkedList<Entry<K,V>>[] table;
 
     public FileMap(int cap){
         this.capacity = cap;
@@ -15,34 +14,34 @@ public abstract class FileMap <K,V> implements Map <ArrayList<String>, ArrayList
 
     public int size() { return n; }
     public boolean isEmpty() { return this.size() == 0; }
-    public boolean containsKey( ArrayList<String> key ) {
+    public boolean containsKey( K key ) {
         int hashValue = hashValue(key);
-        LinkedList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> bucket = table[hashValue];
-        for (Entry<ArrayList<String>, ArrayList<ArrayList<int>>> entry : bucket) {
+        LinkedList<Entry<K,V>> bucket = table[hashValue];
+        for (Entry<K,V> entry : bucket) {
             if (entry.getKey().equals(key)) {
                 return true;
             }
         }
         return false;
     }
-    public ArrayList<ArrayList<int>> get(ArrayList<String> key) {
+    public V get(K key) {
         int hashValue = hashValue(key);
-        LinkedList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> bucket = table[hashValue];
+        LinkedList<Entry<K,V>> bucket = table[hashValue];
         if (table[hashValue] != null) {
-            for (Entry<ArrayList<String>, ArrayList<ArrayList<int>>> entry : bucket) {
+            for (Entry<K,V> entry : bucket) {
                 if (entry.getKey().equals(key))
                     return entry.getValue();
             }
         }
         return null;
     }
-    public ArrayList<ArrayList<int>> remove( ArrayList<String> key ) {
+    public V remove( K key ) {
         int hashValue = hashValue(key);
-        LinkedList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> bucket = table[hashValue];
+        LinkedList<Entry<K,V>> bucket = table[hashValue];
         if (bucket != null) {
-            for (Entry<ArrayList<String>, ArrayList<ArrayList<int>>> entry : bucket) {
+            for (Entry<K,V> entry : bucket) {
                 if (entry.getKey().equals(key)) {
-                    ArrayList<ArrayList<int>> value = entry.getValue();
+                    V value = entry.getValue();
                     bucket.remove(hashValue);
                     n--;
                     return value;
@@ -51,9 +50,9 @@ public abstract class FileMap <K,V> implements Map <ArrayList<String>, ArrayList
         }
         return null;
     }
-    public ArrayList<ArrayList<int>> put( ArrayList<String> key , ArrayList<ArrayList<int>> value ) {
+    public V put( K key, V value ) {
         int hashValue = hashValue(key);
-        LinkedList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> bucket = table[hashValue];
+        LinkedList<Entry<K,V>> bucket = table[hashValue];
         if( bucket == null )
             bucket = table[hashValue] = new LinkedList<>();
         int oldSize = bucket.size();
@@ -64,11 +63,11 @@ public abstract class FileMap <K,V> implements Map <ArrayList<String>, ArrayList
         return value;
     }
 
-    public Iterable<ArrayList<String>> keySet() {
-        ArrayList<ArrayList<String>> buffer = new ArrayList<>();
-        for (LinkedList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> bucket : table) {
+    public Iterable<K> keySet() {
+        ArrayList<K> buffer = new ArrayList<>();
+        for (LinkedList<Entry<K,V>> bucket : table) {
             if (bucket != null) {
-                for (Entry<ArrayList<String>, ArrayList<ArrayList<int>>> entry : bucket) {
+                for (Entry<K,V> entry : bucket) {
                     buffer.add(entry.getKey());
                 }
             }
@@ -76,11 +75,11 @@ public abstract class FileMap <K,V> implements Map <ArrayList<String>, ArrayList
         return buffer;
     }
 
-    public Iterable<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> entrySet() {
-        ArrayList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> buffer = new ArrayList<>();
-        for (LinkedList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> bucket : table) {
+    public Iterable<Entry<K,V>> entrySet() {
+        ArrayList<Entry<K,V>> buffer = new ArrayList<>();
+        for (LinkedList<Entry<K,V>> bucket : table) {
             if (bucket != null) {
-                for (Entry<ArrayList<String>, ArrayList<ArrayList<int>>> entry : bucket) {
+                for (Entry<K,V> entry : bucket) {
                     buffer.add(entry);
                 }
             }
@@ -88,11 +87,11 @@ public abstract class FileMap <K,V> implements Map <ArrayList<String>, ArrayList
         return buffer;
     }
 
-    public Iterable<ArrayList<ArrayList<int>>> values() {
-        ArrayList<ArrayList<ArrayList<int>>> buffer = new ArrayList<>();
-        for (LinkedList<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> bucket : table) {
+    public Iterable<V> values() {
+        ArrayList<V> buffer = new ArrayList<>();
+        for (LinkedList<Entry<K,V>> bucket : table) {
             if (bucket != null) {
-                for (Entry<ArrayList<String>, ArrayList<ArrayList<int>>> entry : bucket) {
+                for (Entry<K,V> entry : bucket) {
                     buffer.add(entry.getValue());
                 }
             }
@@ -101,18 +100,18 @@ public abstract class FileMap <K,V> implements Map <ArrayList<String>, ArrayList
     }
 
 
-    private int hashValue( String key ) {
+    private int hashValue( K key ) {
         return key.hashCode() % capacity;
     }
 
     private void resize( int newCapacity ){
-        List<Entry<ArrayList<String>, ArrayList<ArrayList<int>>>> buffer = new ArrayList<>();
-        for( Entry<ArrayList<String>, ArrayList<ArrayList<int>>> entry : this.entrySet() )
+        List<Entry<K,V>> buffer = new ArrayList<>();
+        for( Entry<K,V> entry : this.entrySet() )
             buffer.add( entry );
         this.capacity = newCapacity;
         this.createTable(); // based on updated capacity
         this.n = 0; // will be recomputed while reinserting entries
-        for( Entry<ArrayList<String>, ArrayList<ArrayList<int>>> entry : buffer )
+        for( Entry<K,V> entry : buffer )
             put( entry.getKey(), entry.getValue() );
     }
 
@@ -122,3 +121,5 @@ public abstract class FileMap <K,V> implements Map <ArrayList<String>, ArrayList
         table = new LinkedList[this.capacity];
     }
 }
+
+
