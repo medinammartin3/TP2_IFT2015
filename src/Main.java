@@ -6,7 +6,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,13 +16,36 @@ public class Main {
     public static void main(String[] args){
 
         String dir = "Inputs";
+        WordMap<String, Integer> mapMots = new WordMap<>(100);
+
         try {
             List<String> processedText = processFilesText(dir);
             System.out.println(processedText);
 
+            int k = 0;
+
             for (String text : processedText){
-                bigramme(text);
+                System.out.println(bigramme(text));
+                // set up pipeline properties
+                Properties props = new Properties();
+                // set the list of annotators to run
+                props.setProperty("annotators", "tokenize,pos,lemma");
+                // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
+                props.setProperty("coref.algorithm", "neural");
+                // build pipeline
+                StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+                // create a document object
+                CoreDocument document = new CoreDocument(text);
+                // annnotate the document
+                pipeline.annotate(document);
+                //System.out.println(document.tokens());
+                for (int i = 0; i<document.tokens().size(); i++) {
+                    mapMots.put(document.tokens().get(i).word(), k);
+                    k++;
+                }
             }
+            System.out.println(mapMots.get("punctuation"));
+
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -79,7 +104,8 @@ public class Main {
         return processedTexts;
     }
 
-    static void bigramme(String text){
+    static ArrayList<LinkedList<String>> bigramme(String text){
+        ArrayList<LinkedList<String>> bigrammes = new ArrayList<>();
         // set up pipeline properties
         Properties props = new Properties();
         // set the list of annotators to run
@@ -94,7 +120,11 @@ public class Main {
         pipeline.annotate(document);
         //System.out.println(document.tokens());
         for (int i = 0; i<document.tokens().size()-1; i++) {
-            System.out.printf("%s\t%s%n", document.tokens().get(i).word(), document.tokens().get(i+1).word());
+            LinkedList<String> tuple = new LinkedList<>();
+            tuple.add(document.tokens().get(i).word());
+            tuple.add(document.tokens().get(i+1).word());
+            bigrammes.add(tuple);
         }
+        return bigrammes;
     }
 }

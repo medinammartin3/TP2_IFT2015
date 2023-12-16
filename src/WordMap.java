@@ -52,10 +52,20 @@ public class WordMap<K,V> implements Map<K,V>{
     }
     public V put( K key, V value ) {
         int hashValue = hashValue(key);
+        int oldSize;
         LinkedList<Entry<K,V>> bucket = table[hashValue];
-        if( bucket == null )
+        if( bucket == null ) {
+            oldSize = 0;
             bucket = table[hashValue] = new LinkedList<>();
-        int oldSize = bucket.size();
+        } else {
+            oldSize = bucket.size();
+            for (Entry<K, V> entry : bucket) {
+                if (entry.getKey().equals(key)){
+                    entry.setValue(value);
+                    return value;
+                }
+            }
+        }
         bucket.add(new Entry<>(key,value));
         this.n += ( bucket.size() - oldSize ); // size may have increased
         if (n > capacity * 0.75) // keep load factor <= 0.75
@@ -101,7 +111,7 @@ public class WordMap<K,V> implements Map<K,V>{
 
 
     private int hashValue( K key ) {
-        return key.hashCode() % capacity;
+        return Math.abs(key.hashCode()) % capacity;
     }
 
     private void resize( int newCapacity ){
