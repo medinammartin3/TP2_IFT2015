@@ -12,80 +12,98 @@ public class Main {
     public static void main(String[] args){
 
         int n = 100;
+        //Spelling corrector TODO
+        String[] request = args[0].split(" ");
+        String[] searches = new String[0];
+        if (request[0].equals("search")) {
+            searches = new String[args.length - 1];
+            System.arraycopy(args, 1, searches, 0, args.length - 1);
+        }
 
-        String dir = "Inputs";
+        String dir = "Inputs/Search";
 
-        WordMap<String, String> mapNomFichiers = new WordMap<>(n);
+        FileMap<String, String> fichiers = new FileMap<>(n);
+        FileMap<String, Integer> fichiersNbMots = new FileMap<>(n);
 
-        WordMap<String, FileMap<String, ArrayList<Integer>>> mapMots = new WordMap<>(n);
+        WordMap<String, FileMap<String, ArrayList<Integer>>> mots = new WordMap<>(n);
 
         try {
             List<String> processedText = processFilesText(dir);
-            System.out.println(processedText);
-
             List<String> nomsFichiers = fichiersDansDossier(dir);
-
             int k = 0;
-
             for (String nomFichier : nomsFichiers){
-                mapNomFichiers.put(nomFichier, processedText.get(k));
+                fichiers.put(nomFichier, processedText.get(k));
+                ++k;
             }
 
-            for (Entry<String, String> nomFichier : mapNomFichiers.entrySet()){
-                String fichier = nomFichier.getKey();
-                String text = nomFichier.getValue();
-                System.out.println(bigramme(text));
-                // set up pipeline properties
-                Properties props = new Properties();
-                // set the list of annotators to run
-                props.setProperty("annotators", "tokenize,pos,lemma");
-                // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
-                props.setProperty("coref.algorithm", "neural");
-                // build pipeline
-                StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-                // create a document object
-                CoreDocument document = new CoreDocument(text);
-                // annnotate the document
-                pipeline.annotate(document);
-                //System.out.println(document.tokens());
-                for (int i = 0; i<document.tokens().size(); i++) {
-                    String mot = document.tokens().get(i).word();
-                    FileMap<String, ArrayList<Integer>> motInFileMap =  mapMots.get(mot);
-                    if (motInFileMap == null) {
-                        FileMap<String, ArrayList<Integer>> motFileMap = mapMots.put(mot, new FileMap<>(n));
+            for (Entry<String, String> fichier : fichiers.entrySet()){
+                String nomFichier = fichier.getKey();
+                String[] contenu = fichier.getValue().split(" ");
+                int nbMotsDansFichier = contenu.length;
+                fichiersNbMots.put(nomFichier, nbMotsDansFichier);
+
+                for (int i = 0; i < nbMotsDansFichier; ++i) {
+                    String mot = contenu[i];
+                    FileMap<String, ArrayList<Integer>> fm =  mots.get(mot);
+                    if (fm == null) {
+                        FileMap<String, ArrayList<Integer>> motFileMap = mots.put(mot, new FileMap<>(n));
                         ArrayList<Integer> tempList = new ArrayList<>();
                         tempList.add(i);
-                        motFileMap.put(fichier, tempList);
+                        motFileMap.put(nomFichier, tempList);
                     } else {
-                        ArrayList<Integer> positions = motInFileMap.get(fichier);
+                        ArrayList<Integer> positions = fm.get(nomFichier);
                         if (positions == null) {
                             ArrayList<Integer> tempList = new ArrayList<>();
                             tempList.add(i);
-                            motInFileMap.put(fichier, tempList);
+                            fm.put(nomFichier, tempList);
                         } else {
                             positions.add(i);
                         }
                     }
-
                 }
             }
-
-            for (Entry<String, FileMap<String, ArrayList<Integer>>> entry : mapMots.entrySet()) {
-                System.out.print(entry.getKey() + ": ");
-                for (Entry<String, ArrayList<Integer>> entryFileMap : entry.getValue().entrySet()){
-                    System.out.print(entryFileMap.getKey() + " -> [");
-                    for (int pos : entryFileMap.getValue()){
-                        System.out.print(pos + ", ");
-                    }
-                    System.out.println("]");
-                }
-            }
-
         } catch (IOException e){
             e.printStackTrace();
         }
+
+        //WordMap printer
+        for (Entry<String, FileMap<String, ArrayList<Integer>>> entry : mots.entrySet()) {
+            System.out.print(entry.getKey() + ": ");
+            ArrayList<String> mapS = new ArrayList<>();
+            for (Entry<String, ArrayList<Integer>> entryFileMap : entry.getValue().entrySet())
+                mapS.add(entryFileMap.getKey() + " -> " + entryFileMap.getValue().toString());
+            System.out.println(mapS);
+        }
+
+        //Bigramme TODO
+
+        //search
+        int nbFichiersTotal = fichiersNbMots.size();
+        for (String mot : searches) {
+            FileMap<String, ArrayList<Integer>> fm = mots.get(mot);
+            String fichier = "";
+            double score = 0;
+            double IDF = 1 + Math.log( (double) (1 + nbFichiersTotal) / (1 + fm.size()));
+            for (Entry<String, ArrayList<Integer>> fic : fm.entrySet()) {
+                String nomFichier = fic.getKey();
+                double TF = (double) fic.getValue().size() / fichiersNbMots.get(nomFichier);
+                double TFIDF = TF * IDF;
+                if (TFIDF > score) {
+                    fichier = nomFichier;
+                    score = TFIDF;
+                }
+                else if (TFIDF == score)
+                    fichier = nomFichier.compareTo(fichier) > 0 ? fichier : nomFichier;
+            }
+            System.out.println("Le meilleur fichier pour le mot \"" + mot + "\" est \"" + fichier + "\"."
+            + " avec un score de " + arrondirDouble(score, 4));
+        }
     }
 
+    static double arrondirDouble(double n, int precision) {
+        double facteur = Math.pow(10, precision);
+        return  Math.round(n * facteur) / facteur;
+    }
     static List<String> fichiersDansDossier(String path) {
         return Arrays.asList(Objects.requireNonNull(new File(path).list()));
     }
@@ -100,7 +118,7 @@ public class Main {
         for (File file : listOfFiles) {
             if (file.isFile()) {
                 BufferedReader br = new BufferedReader(new FileReader(new File(dir + "/" + file.getName())));
-                StringBuffer word = new StringBuffer();
+                StringBuilder word = new StringBuilder();
                 String line;
                 while ((line = br.readLine()) != null) {
                     String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
