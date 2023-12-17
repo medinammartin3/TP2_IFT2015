@@ -42,7 +42,7 @@ public class FileMap<K,V> implements Map<K,V>{
             for (Entry<K,V> entry : bucket) {
                 if (entry.getKey().equals(key)) {
                     V value = entry.getValue();
-                    bucket.remove(hashValue);
+                    bucket.remove(entry);
                     n--;
                     return value;
                 }
@@ -101,7 +101,7 @@ public class FileMap<K,V> implements Map<K,V>{
 
 
     private int hashValue( K key ) {
-        return key.hashCode() % capacity;
+        return Math.abs(key.hashCode()) % capacity;
     }
 
     private void resize( int newCapacity ){

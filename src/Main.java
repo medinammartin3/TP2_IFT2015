@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args){
 
         String dir = "Inputs";
-        WordMap<String, Integer> mapMots = new WordMap<>(100);
+        WordMap<String, Integer> mapMots = new WordMap<>(2);
 
         try {
             List<String> processedText = processFilesText(dir);
@@ -44,6 +44,8 @@ public class Main {
                     k++;
                 }
             }
+            mapMots.remove("punctuation");
+
             System.out.println(mapMots.get("punctuation"));
 
         } catch (IOException e){
