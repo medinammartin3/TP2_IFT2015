@@ -15,6 +15,12 @@ public class Entry<K,V>{
         return value;
     }
 
-    public void setValue(V value) { this.value = value; }
+    // public void setValue(V value) { this.value = value; }
+
+
+    @Override
+    public String toString() {
+        return "(" + key.toString() + ", " + value.toString() + ")";
+    }
 }
 

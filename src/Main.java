@@ -6,25 +6,34 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args){
 
+        int n = 100;
+
         String dir = "Inputs";
-        WordMap<String, Integer> mapMots = new WordMap<>(2);
+
+        WordMap<String, String> mapNomFichiers = new WordMap<>(n);
+
+        WordMap<String, FileMap<String, ArrayList<Integer>>> mapMots = new WordMap<>(n);
 
         try {
             List<String> processedText = processFilesText(dir);
             System.out.println(processedText);
 
+            List<String> nomsFichiers = fichiersDansDossier(dir);
+
             int k = 0;
 
-            for (String text : processedText){
+            for (String nomFichier : nomsFichiers){
+                mapNomFichiers.put(nomFichier, processedText.get(k));
+            }
+
+            for (Entry<String, String> nomFichier : mapNomFichiers.entrySet()){
+                String fichier = nomFichier.getKey();
+                String text = nomFichier.getValue();
                 System.out.println(bigramme(text));
                 // set up pipeline properties
                 Properties props = new Properties();
@@ -40,17 +49,45 @@ public class Main {
                 pipeline.annotate(document);
                 //System.out.println(document.tokens());
                 for (int i = 0; i<document.tokens().size(); i++) {
-                    mapMots.put(document.tokens().get(i).word(), k);
-                    k++;
+                    String mot = document.tokens().get(i).word();
+                    FileMap<String, ArrayList<Integer>> motInFileMap =  mapMots.get(mot);
+                    if (motInFileMap == null) {
+                        FileMap<String, ArrayList<Integer>> motFileMap = mapMots.put(mot, new FileMap<>(n));
+                        ArrayList<Integer> tempList = new ArrayList<>();
+                        tempList.add(i);
+                        motFileMap.put(fichier, tempList);
+                    } else {
+                        ArrayList<Integer> positions = motInFileMap.get(fichier);
+                        if (positions == null) {
+                            ArrayList<Integer> tempList = new ArrayList<>();
+                            tempList.add(i);
+                            motInFileMap.put(fichier, tempList);
+                        } else {
+                            positions.add(i);
+                        }
+                    }
+
                 }
             }
-            mapMots.remove("punctuation");
 
-            System.out.println(mapMots.get("punctuation"));
+            for (Entry<String, FileMap<String, ArrayList<Integer>>> entry : mapMots.entrySet()) {
+                System.out.print(entry.getKey() + ": ");
+                for (Entry<String, ArrayList<Integer>> entryFileMap : entry.getValue().entrySet()){
+                    System.out.print(entryFileMap.getKey() + " -> [");
+                    for (int pos : entryFileMap.getValue()){
+                        System.out.print(pos + ", ");
+                    }
+                    System.out.println("]");
+                }
+            }
 
         } catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    static List<String> fichiersDansDossier(String path) {
+        return Arrays.asList(Objects.requireNonNull(new File(path).list()));
     }
 
     static List<String> processFilesText(String dir) throws IOException{
