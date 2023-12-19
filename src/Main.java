@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args){
 
         int n = 100;
-        //Spelling corrector TODO
+        //Spelling corrector - TODO
         String[] request = args[0].split(" ");
         String[] searches = new String[0];
         String bigramme = "";
