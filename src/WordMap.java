@@ -17,6 +17,8 @@ public class WordMap<K,V> implements Map<K,V>{
     public boolean containsKey( K key ) {
         int hashValue = hashValue(key);
         LinkedList<Entry<K,V>> bucket = table[hashValue];
+        if (bucket == null)
+            return false;
         for (Entry<K,V> entry : bucket) {
             if (entry.getKey().equals(key)) {
                 return true;
@@ -50,28 +52,20 @@ public class WordMap<K,V> implements Map<K,V>{
         }
         return null;
     }
-//    public V put( K key, V value ) {
-//        int hashValue = hashValue(key);
-//        int oldSize;
-//        LinkedList<Entry<K,V>> bucket = table[hashValue];
-//        if( bucket == null ) {
-//            oldSize = 0;
-//            bucket = table[hashValue] = new LinkedList<>();
-//        } else {
-//            oldSize = bucket.size();
-//            for (Entry<K, V> entry : bucket) {
-//                if (entry.getKey().equals(key)){
-//                    entry.setValue(value);
-//                    return value;
-//                }
-//            }
-//        }
-//        bucket.add(new Entry<>(key,value));
-//        this.n += ( bucket.size() - oldSize ); // size may have increased
-//        if (n > capacity * 0.75) // keep load factor <= 0.75
-//            resize(2 * capacity + 1);
-//        return value;
-//    }
+    public V setValue( K key, V value ) {
+        int hashValue = hashValue(key);
+        LinkedList<Entry<K,V>> bucket = table[hashValue];
+        if( bucket == null ) {
+            return null;
+        }
+        for (Entry<K, V> entry : bucket) {
+            if (entry.getKey().equals(key)){
+                entry.setValue(value);
+                return value;
+            }
+        }
+        return null;
+    }
 
     public V put( K key, V value ) {
         int hashValue = hashValue(key);

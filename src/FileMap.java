@@ -79,9 +79,7 @@ public class FileMap<K,V> implements Map<K,V>{
         ArrayList<Entry<K,V>> buffer = new ArrayList<>();
         for (LinkedList<Entry<K,V>> bucket : table) {
             if (bucket != null) {
-                for (Entry<K,V> entry : bucket) {
-                    buffer.add(entry);
-                }
+                buffer.addAll(bucket);
             }
         }
         return buffer;
