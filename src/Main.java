@@ -9,18 +9,26 @@ import java.io.IOException;
 import java.util.*;
 
 public class Main {
+    static ArrayList<String[]> bigrammes;
     public static void main(String[] args){
 
         int n = 100;
         //Spelling corrector TODO
         String[] request = args[0].split(" ");
         String[] searches = new String[0];
+        String bigramme = "";
+        String concat = request[0] + request[1] + request[2] + request[3] + request[4];
         if (request[0].equals("search")) {
             searches = new String[args.length - 1];
             System.arraycopy(args, 1, searches, 0, args.length - 1);
+        } else if (concat.equals("themostprobablebigramof")){
+            bigramme = request[5];
+        } else{
+            System.out.println("Commande inconnue");
+            return;
         }
 
-        String dir = "Inputs/Search";
+        String dir = "dataset";
 
         FileMap<String, String> fichiers = new FileMap<>(n);
         FileMap<String, Integer> fichiersNbMots = new FileMap<>(n);
@@ -29,6 +37,11 @@ public class Main {
 
         try {
             List<String> processedText = processFilesText(dir);
+            if (!bigramme.isEmpty()){
+                for (String contenu : processedText) {
+                    bigramme(contenu.split(" "));
+                }
+            }
             List<String> nomsFichiers = fichiersDansDossier(dir);
             int k = 0;
             for (String nomFichier : nomsFichiers){
@@ -75,7 +88,11 @@ public class Main {
             System.out.println(mapS);
         }
 
-        //Bigramme TODO
+        //Bigrammes
+        if (! bigramme.isEmpty()){
+            System.out.println();
+        }
+
 
         //search
         int nbFichiersTotal = fichiersNbMots.size();
@@ -161,27 +178,13 @@ public class Main {
         return processedTexts;
     }
 
-    static ArrayList<LinkedList<String>> bigramme(String text){
-        ArrayList<LinkedList<String>> bigrammes = new ArrayList<>();
-        // set up pipeline properties
-        Properties props = new Properties();
-        // set the list of annotators to run
-        props.setProperty("annotators", "tokenize,pos,lemma");
-        // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
-        props.setProperty("coref.algorithm", "neural");
-        // build pipeline
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        // create a document object
-        CoreDocument document = new CoreDocument(text);
-        // annnotate the document
-        pipeline.annotate(document);
-        //System.out.println(document.tokens());
-        for (int i = 0; i<document.tokens().size()-1; i++) {
-            LinkedList<String> tuple = new LinkedList<>();
-            tuple.add(document.tokens().get(i).word());
-            tuple.add(document.tokens().get(i+1).word());
+    static void bigramme(String[] text){
+        bigrammes = new ArrayList<>();
+        for (int i = 0; i<text.length-1; i++) {
+            String[] tuple = new String[2];
+            tuple[0] = (text[i]);
+            tuple[1] = (text[i+1]);
             bigrammes.add(tuple);
         }
-        return bigrammes;
     }
 }
