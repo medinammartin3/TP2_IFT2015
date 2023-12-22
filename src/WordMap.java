@@ -3,10 +3,11 @@ import java.util.List;
 import java.util.LinkedList;
 
 public class WordMap<K,V> implements Map<K,V>{
-    private int n = 0; // number of entries in the map
-    private int capacity; // size of the table
-    private LinkedList<Entry<K,V>>[] table;
+    private int n = 0; // Nombre d'elements dans la Map
+    private int capacity; // taille de la Map
+    private LinkedList<Entry<K,V>>[] table; // On utilise LinkedList pour traiter des eventuelles collisions
 
+    // 2 constructeurs au choix
     public WordMap(int cap){
         this.capacity = cap;
         this.createTable();
@@ -30,6 +31,8 @@ public class WordMap<K,V> implements Map<K,V>{
         }
         return false;
     }
+
+    // Chercher la valeur d'une cle
     public V get(K key) {
         int hashValue = hashValue(key);
         LinkedList<Entry<K,V>> bucket = table[hashValue];

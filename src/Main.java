@@ -74,7 +74,7 @@ public class Main {
                                 fichier = nomFichier.compareTo(fichier) > 0 ? fichier : nomFichier;
                         }
                         bw.write(fichier + "\n");
-                        System.out.println(mot + ";" + fichier + ";" + score);
+                        System.out.println(mot + ";" + fichier + ";" + " | Score: " + score);
                     }
                 }
                 else if (s[0].equals("the") && s[1].equals("most") && s[2].equals("probable") && s[3].equals("bigram")
@@ -105,10 +105,6 @@ public class Main {
             }
             bw.close();
             br.close();
-            int div = 1000000;
-            long finalTime = System.nanoTime() - time;
-            System.out.println("Time pour annoter en ms: " + timeAnnoter / div);
-            System.out.println("Time pour notre algo en ms: " + finalTime / div);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -159,12 +155,7 @@ public class Main {
                 str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
 
                 processedTexts.add(str);
-                // now str is a string which has the content of the read file but it is
-                // processed and their words are space-separated. However there maybe some
-                // details which has not been cleaned very well, just follow these steps to
-                // clean the text.
-                // in the following you can continue your own implementation
-                System.out.println("Annotation des documents; Progrès: " + (float) cpt / listOfFiles.length * 100 + "%");
+                System.out.println("Annotation des documents; Progrès: " + Math.round((float) cpt / listOfFiles.length * 100) + "%");
                 ++cpt;
             }
         }
