@@ -3,12 +3,16 @@ import java.util.List;
 import java.util.LinkedList;
 
 public class WordMap<K,V> implements Map<K,V>{
-    protected int n = 0; // number of entries in the map
-    protected int capacity; // size of the table
+    private int n = 0; // number of entries in the map
+    private int capacity; // size of the table
     private LinkedList<Entry<K,V>>[] table;
 
     public WordMap(int cap){
         this.capacity = cap;
+        this.createTable();
+    }
+    public WordMap() {
+        this.capacity = 16;
         this.createTable();
     }
 
@@ -52,7 +56,7 @@ public class WordMap<K,V> implements Map<K,V>{
         }
         return null;
     }
-    public V setValue( K key, V value ) {
+    public V replace( K key, V value ) {
         int hashValue = hashValue(key);
         LinkedList<Entry<K,V>> bucket = table[hashValue];
         if( bucket == null ) {
@@ -133,7 +137,7 @@ public class WordMap<K,V> implements Map<K,V>{
     }
 
     @SuppressWarnings("unchecked")
-    public void createTable(){
+    private void createTable(){
         // create an empty table of current capacity
         table = new LinkedList[this.capacity];
     }

@@ -3,39 +3,35 @@ import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class Main {
     public static void main(String[] args){
-
-        int n = 100;
         String dir = "dataset";
         try {
+            long time = System.nanoTime();
             List<String> texteTraiteDesFichiers = processFilesText(dir);
-            List<String> nomsFichiers = fichiersDansDossier(dir);
-            FileMap<String, String> fichiers = new FileMap<>(n);
-            FileMap<String, Integer> fichiersNbMots = new FileMap<>(n);
-            WordMap<String, FileMap<String, ArrayList<Integer>>> mots = new WordMap<>(n);
+            long timeAnnoter = System.nanoTime() - time;
+            time = System.nanoTime();
+            String[] nomsFichiers = Objects.requireNonNull(new File(dir).list());
+            FileMap<String, String[]> fichiers = new FileMap<>(100);
+            WordMap<String, FileMap<String, ArrayList<Integer>>> mots = new WordMap<>(100);
             int k = 0;
             for (String nomFichier : nomsFichiers){
-                fichiers.put(nomFichier, texteTraiteDesFichiers.get(k));
+                fichiers.put(nomFichier, texteTraiteDesFichiers.get(k).split(" "));
                 ++k;
             }
 
-            for (Entry<String, String> fichier : fichiers.entrySet()) {
+            for (Entry<String, String[]> fichier : fichiers.entrySet()) {
                 String nomFichier = fichier.getKey();
-                String[] contenu = fichier.getValue().split(" ");
+                String[] contenu = fichier.getValue();
                 int nbMotsDansFichier = contenu.length;
-                fichiersNbMots.put(nomFichier, nbMotsDansFichier);
 
                 for (int i = 0; i < nbMotsDansFichier; ++i) {
                     String mot = contenu[i];
                     FileMap<String, ArrayList<Integer>> fm = mots.get(mot);
                     if (fm == null) {
-                        FileMap<String, ArrayList<Integer>> motFileMap = mots.put(mot, new FileMap<>(n));
+                        FileMap<String, ArrayList<Integer>> motFileMap = mots.put(mot, new FileMap<>());
                         ArrayList<Integer> tempList = new ArrayList<>();
                         tempList.add(i);
                         motFileMap.put(nomFichier, tempList);
@@ -53,21 +49,22 @@ public class Main {
             }
 
             BufferedWriter bw = new BufferedWriter(new FileWriter("solution.txt"));
-            String[] requetes =
-                    Files.readAllLines(Paths.get("query.txt"), StandardCharsets.UTF_8).toArray(new String[0]);
-            for (String requete : requetes) {
-                String[] s = requete.split(" ");
+            BufferedReader br = new BufferedReader(new FileReader("query.txt"));
+
+            String ligne;
+            while ((ligne = br.readLine()) != null) {
+                String[] s = ligne.split(" ");
                 if (s[0].equals("search")) {
                     for (int i = 1; i < s.length; ++i) {
                         String mot = trouverMotLePlusProche((List<String>) mots.keySet(), s[i]);
-                        int nbFichiersTotal = fichiersNbMots.size();
+                        int nbFichiersTotal = fichiers.size();
                         FileMap<String, ArrayList<Integer>> fm = mots.get(mot);
                         String fichier = "";
                         double score = 0;
                         double IDF = 1 + Math.log( (double) (1 + nbFichiersTotal) / (1 + fm.size()));
                         for (Entry<String, ArrayList<Integer>> fic : fm.entrySet()) {
                             String nomFichier = fic.getKey();
-                            double TF = (double) fic.getValue().size() / fichiersNbMots.get(nomFichier);
+                            double TF = (double) fic.getValue().size() / fichiers.get(nomFichier).length;
                             double TFIDF = TF * IDF;
                             if (TFIDF > score) {
                                 fichier = nomFichier;
@@ -77,14 +74,13 @@ public class Main {
                                 fichier = nomFichier.compareTo(fichier) > 0 ? fichier : nomFichier;
                         }
                         bw.write(fichier + "\n");
-                        System.out.println("Le meilleur fichier pour le mot \"" + mot + "\" est \"" + fichier + "\"."
-                                + " avec un score de " + arrondirDouble(score, 4));
+                        System.out.println(mot + ";" + fichier + ";" + score);
                     }
                 }
                 else if (s[0].equals("the") && s[1].equals("most") && s[2].equals("probable") && s[3].equals("bigram")
                 && s[4].equals("of")) {
                     String mot = trouverMotLePlusProche((List<String>) mots.keySet(), s[5]);
-                    WordMap<String, Integer> big = new WordMap<>(n);
+                    WordMap<String, Integer> big = new WordMap<>();
                     for (String contenu: texteTraiteDesFichiers) {
                         trouverBigramme(big, contenu.split(" "), mot);
                     }
@@ -104,10 +100,15 @@ public class Main {
                     System.out.println(mot + " " + bigramme);
                 }
                 else {
-                    System.out.println("Commande inconnue dans query.txt: " + requete);
+                    System.out.println("Commande inconnue dans query.txt: " + ligne);
                 }
             }
             bw.close();
+            br.close();
+            int div = 1000000;
+            long finalTime = System.nanoTime() - time;
+            System.out.println("Time pour annoter en ms: " + timeAnnoter / div);
+            System.out.println("Time pour notre algo en ms: " + finalTime / div);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -121,6 +122,7 @@ public class Main {
         // CODE OBTENU DE L'ÉNONCÉ DU TP
         File folder = new File(dir);
         File[] listOfFiles = folder.listFiles();
+        int cpt = 0;
         for (File file : listOfFiles) {
             if (file.isFile()) {
                 BufferedReader br = new BufferedReader(new FileReader(new File(dir + "/" + file.getName())));
@@ -162,7 +164,8 @@ public class Main {
                 // details which has not been cleaned very well, just follow these steps to
                 // clean the text.
                 // in the following you can continue your own implementation
-                System.out.println("Annotation des documents; Progrès: " + file);
+                System.out.println("Annotation des documents; Progrès: " + (float) cpt / listOfFiles.length * 100 + "%");
+                ++cpt;
             }
         }
         return processedTexts;
@@ -173,7 +176,7 @@ public class Main {
             if (texte[i].equals(mot)) {
                 String bi = texte[i + 1];
                 if (map.containsKey(bi))
-                    map.setValue(bi, map.get(bi) + 1);
+                    map.replace(bi, map.get(bi) + 1);
                 else
                     map.put(bi, 1);
             }
@@ -258,13 +261,4 @@ public class Main {
         return Arrays.stream(nums).min().orElse(Integer.MAX_VALUE);
     }
     //END OF PLAGIAT
-
-    //TO DELETE AFTER
-    static double arrondirDouble(double n, int precision) {
-        double facteur = Math.pow(10, precision);
-        return  Math.round(n * facteur) / facteur;
-    }
-    static List<String> fichiersDansDossier(String path) {
-        return Arrays.asList(Objects.requireNonNull(new File(path).list()));
-    }
 }

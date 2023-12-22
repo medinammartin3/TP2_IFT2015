@@ -3,12 +3,16 @@ import java.util.List;
 import java.util.LinkedList;
 
 public class FileMap<K,V> implements Map<K,V>{
-    protected int n = 0; // number of entries in the map
-    protected int capacity; // size of the table
+    private int n = 0; // number of entries in the map
+    private int capacity; // size of the table
     private LinkedList<Entry<K,V>>[] table;
 
     public FileMap(int cap){
         this.capacity = cap;
+        this.createTable();
+    }
+    public FileMap() {
+        this.capacity = 16;
         this.createTable();
     }
 
@@ -114,7 +118,7 @@ public class FileMap<K,V> implements Map<K,V>{
     }
 
     @SuppressWarnings("unchecked")
-    public void createTable(){
+    private void createTable(){
         // create an empty table of current capacity
         table = new LinkedList[this.capacity];
     }

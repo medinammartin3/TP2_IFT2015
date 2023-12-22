@@ -1,5 +1,5 @@
 public class Entry<K,V>{
-    private K key;
+    private final K key;
     private V value;
 
     public Entry(K key, V value) {
@@ -15,12 +15,6 @@ public class Entry<K,V>{
         return value;
     }
 
-     public void setValue(V value) { this.value = value; }
-
-
-    @Override
-    public String toString() {
-        return "(" + key.toString() + ", " + value.toString() + ")";
-    }
+    public void setValue(V value) { this.value = value; }
 }
 
