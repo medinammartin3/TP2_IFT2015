@@ -1,3 +1,9 @@
+//Auteurs:
+//Étienne Mitchell-Bouchard (20243430)
+//Martin Medina (20235219)
+
+//Inspiré des notes de cours sur les tables de hachages (5.2)
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedList;
@@ -13,8 +19,7 @@ public class WordMap<K,V> implements Map<K,V>{
         this.createTable();
     }
     public WordMap() {
-        this.capacity = 16;
-        this.createTable();
+        this(16);
     }
 
     public int size() { return n; }
@@ -66,9 +71,8 @@ public class WordMap<K,V> implements Map<K,V>{
         int hashValue = hashValue(key);
         LinkedList<Entry<K,V>> bucket = table[hashValue];
         if( bucket == null ) // Le bucket où on veut mettre le mot est vide
-        {
             bucket = table[hashValue] = new LinkedList<>();
-        } else {
+        else {
             for (Entry<K, V> entry : bucket) {
                 if (entry.getKey().equals(key)) // La cle existe deja
                 {
@@ -102,15 +106,13 @@ public class WordMap<K,V> implements Map<K,V>{
         ArrayList<Entry<K,V>> buffer = new ArrayList<>();
         for (LinkedList<Entry<K,V>> bucket : table) {
             if (bucket != null) {
-                for (Entry<K,V> entry : bucket) {
-                    buffer.add(entry);
-                }
+                buffer.addAll(bucket);
             }
         }
         return buffer;
     }
 
-    // ArrayList de toutes les valeur de la Map
+    // ArrayList de toutes les valeurs de la Map
     public Iterable<V> values() {
         ArrayList<V> buffer = new ArrayList<>();
         for (LinkedList<Entry<K,V>> bucket : table) {
@@ -123,7 +125,7 @@ public class WordMap<K,V> implements Map<K,V>{
         return buffer;
     }
 
-    // Code de hashage
+    // Code de hachage
     private int hashValue( K key ) {
         return Math.abs(key.hashCode()) % capacity;
     }

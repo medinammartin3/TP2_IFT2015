@@ -1,3 +1,7 @@
+//Auteurs:
+//Étienne Mitchell-Bouchard (20243430)
+//Martin Medina (20235219)
+
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
@@ -6,145 +10,183 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
+    static final String dataPath = "dataset";
+    static final String queryPath = "query.txt";
     public static void main(String[] args){
-        String dir = "dataset";
         try {
-            long time = System.nanoTime();
-            List<String> texteTraiteDesFichiers = processFilesText(dir);
-            long timeAnnoter = System.nanoTime() - time;
-            time = System.nanoTime();
-            String[] nomsFichiers = Objects.requireNonNull(new File(dir).list());
-            FileMap<String, String[]> fichiers = new FileMap<>(100);
-            WordMap<String, FileMap<String, ArrayList<Integer>>> mots = new WordMap<>(100);
+            List<String> texteTraiteDesFichiers = formatterFichiers();
+            FileMap<String, String[]> fichiers = new FileMap<>(100); //Nom des fichiers et leur contenu
+            //Remplissage de la FileMap
             int k = 0;
-            for (String nomFichier : nomsFichiers){
+            for (String nomFichier : Objects.requireNonNull(new File(dataPath).list())){
                 fichiers.put(nomFichier, texteTraiteDesFichiers.get(k).split(" "));
                 ++k;
             }
-
+            //Remplissage de la WordMap
+            WordMap<String, FileMap<String, ArrayList<Integer>>> mots = new WordMap<>(100); //Map principale
             for (Entry<String, String[]> fichier : fichiers.entrySet()) {
                 String nomFichier = fichier.getKey();
                 String[] contenu = fichier.getValue();
                 int nbMotsDansFichier = contenu.length;
-
+                //On parcourt chaque mot dans le fichier
                 for (int i = 0; i < nbMotsDansFichier; ++i) {
                     String mot = contenu[i];
                     FileMap<String, ArrayList<Integer>> fm = mots.get(mot);
+                    //Pour un mot jamais rencontré dans le dataset
                     if (fm == null) {
                         FileMap<String, ArrayList<Integer>> motFileMap = mots.put(mot, new FileMap<>());
                         ArrayList<Integer> tempList = new ArrayList<>();
                         tempList.add(i);
                         motFileMap.put(nomFichier, tempList);
-                    } else {
+
+                    }
+                    //Pour un mot déjà rencontré dans le dataset
+                    else {
                         ArrayList<Integer> positions = fm.get(nomFichier);
+                        //Première fois qu'on rencontre le mot dans le fichier
                         if (positions == null) {
                             ArrayList<Integer> tempList = new ArrayList<>();
                             tempList.add(i);
                             fm.put(nomFichier, tempList);
-                        } else {
-                            positions.add(i);
                         }
+                        //Mot déjà rencontré dans le fichier
+                        else
+                            positions.add(i);
                     }
                 }
             }
-
-            BufferedWriter bw = new BufferedWriter(new FileWriter("solution.txt"));
-            BufferedReader br = new BufferedReader(new FileReader("query.txt"));
-
+            //Traitement des requêtes
+            BufferedReader br = new BufferedReader(new FileReader(queryPath));
+            ArrayList<String> solutions = new ArrayList<>();
             String ligne;
             while ((ligne = br.readLine()) != null) {
                 String[] s = ligne.split(" ");
+                //Requête de recherche
                 if (s[0].equals("search")) {
-                    for (int i = 1; i < s.length; ++i) {
-                        String mot = trouverMotLePlusProche((List<String>) mots.keySet(), s[i]);
-                        int nbFichiersTotal = fichiers.size();
+                    String fichierMax = "";
+                    //Pour un seul mot
+                    if (s.length == 2) {
+                        String mot = trouverMotLePlusProche((List<String>) mots.keySet(), s[1]);
                         FileMap<String, ArrayList<Integer>> fm = mots.get(mot);
-                        String fichier = "";
                         double score = 0;
-                        double IDF = 1 + Math.log( (double) (1 + nbFichiersTotal) / (1 + fm.size()));
+                        double IDF = 1 + Math.log( (double) (1 + fichiers.size()) / (1 + fm.size()));
+                        //Trouver le score pour chaque fichier et trouver le score maximum
                         for (Entry<String, ArrayList<Integer>> fic : fm.entrySet()) {
-                            String nomFichier = fic.getKey();
-                            double TF = (double) fic.getValue().size() / fichiers.get(nomFichier).length;
+                            String fichier = fic.getKey();
+                            double TF = (double) fic.getValue().size() / fichiers.get(fichier).length;
                             double TFIDF = TF * IDF;
                             if (TFIDF > score) {
-                                fichier = nomFichier;
+                                fichierMax = fichier;
                                 score = TFIDF;
                             }
                             else if (TFIDF == score)
-                                fichier = nomFichier.compareTo(fichier) > 0 ? fichier : nomFichier;
+                                fichierMax = plusPetitString(fichierMax, fichier);
                         }
-                        bw.write(fichier + "\n");
-                        System.out.println(mot + ";" + fichier + ";" + " | Score: " + score);
+                        System.out.println(mot + ": " + fichierMax + " | Score: " + score);
                     }
+                    //Pour plusieurs mots
+                    else {
+                        //Additionner les scores
+                        FileMap<String, Double> scoresDesFichiers = new FileMap<>(100);
+                        for (int i = 1; i < s.length; ++i) {
+                            String mot = trouverMotLePlusProche((List<String>) mots.keySet(), s[i]);
+                            FileMap<String, ArrayList<Integer>> fm = mots.get(mot);
+                            double IDF = 1 + Math.log( (double) (1 + fichiers.size()) / (1 + fm.size()));
+                            for (Entry<String, ArrayList<Integer>> fic : fm.entrySet()) {
+                                String fichier = fic.getKey();
+                                double TF = (double) fic.getValue().size() / fichiers.get(fichier).length;
+                                double TFIDF = TF * IDF;
+                                if (scoresDesFichiers.containsKey(fichier))
+                                    scoresDesFichiers.put(fichier, scoresDesFichiers.get(fichier) + TFIDF);
+                                else
+                                    scoresDesFichiers.put(fichier, TFIDF);
+                            }
+                        }
+                        //Trouver le plus grand score
+                        double max = 0;
+                        for(Entry<String, Double> e : scoresDesFichiers.entrySet()) {
+                            if (e.getValue() > max){
+                                fichierMax = e.getKey();
+                                max = e.getValue();
+                            }
+                            else if (e.getValue() == max)
+                                fichierMax = plusPetitString(fichierMax, e.getKey());
+                        }
+                        System.out.println(fichierMax + " | Score: " + max);
+                    }
+                    solutions.add(fichierMax);
                 }
+                //Bigrammes
                 else if (s[0].equals("the") && s[1].equals("most") && s[2].equals("probable") && s[3].equals("bigram")
                 && s[4].equals("of")) {
                     String mot = trouverMotLePlusProche((List<String>) mots.keySet(), s[5]);
-                    WordMap<String, Integer> big = new WordMap<>();
-                    for (String contenu: texteTraiteDesFichiers) {
+                    //Trouver tous les bigrammes du mot
+                    WordMap<String, Integer> big = new WordMap<>(100);
+                    for (String contenu: texteTraiteDesFichiers)
                         trouverBigramme(big, contenu.split(" "), mot);
-                    }
-                    String bigramme = "";
+                    String bigrammeMax = "";
                     int fois = 0;
+                    //Trouver le bigramme le plus probable
                     for(Entry<String, Integer> entry : big.entrySet()) {
-                        String m = entry.getKey();
+                        String bigramme = entry.getKey();
                         if (entry.getValue() > fois) {
-                            bigramme = m;
+                            bigrammeMax = bigramme;
                             fois = entry.getValue();
                         }
-                        else if (entry.getValue() == fois) {
-                            bigramme = m.compareTo(bigramme) > 0 ? bigramme : m;
-                        }
+                        else if (entry.getValue() == fois)
+                            bigrammeMax = plusPetitString(bigramme, bigrammeMax);
                     }
-                    bw.write(mot + " " + bigramme + "\n");
-                    System.out.println(mot + " " + bigramme);
+                    solutions.add(mot + " " + bigrammeMax);
+                    System.out.println(mot + " " + bigrammeMax);
                 }
                 else {
-                    System.out.println("Commande inconnue dans query.txt: " + ligne);
+                    System.out.println("Commande inconnue dans " + queryPath + ": " + ligne);
                 }
             }
-            bw.close();
             br.close();
+            //Écrire les solutions
+            BufferedWriter bw = new BufferedWriter(new FileWriter("solution.txt"));
+            bw.write(String.join("\n", solutions));
+            bw.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    static List<String> processFilesText(String dir) throws IOException{
+    //Trouve le plus petit String alphabétiquement. Chiffre < Majuscules < Minuscules
+    static String plusPetitString(String s1, String s2) {
+        return s1.compareTo(s2) > 0 ? s2 : s1;
+    }
+    //Formatte tous les fichiers dans le dataset et les retourne sous forme de List avec comme élément le contenu
+    //formatté de chaque fichier sous forme de String
+    static List<String> formatterFichiers() throws IOException{
 
         List<String> processedTexts = new ArrayList<>();
 
-        // CODE OBTENU DE L'ÉNONCÉ DU TP
-        File folder = new File(dir);
+        // Code obtenu de l'énoncé du TP avec quelques modifications
+        File folder = new File(dataPath);
         File[] listOfFiles = folder.listFiles();
+        if (listOfFiles == null)
+            listOfFiles = new File[0]; //Liste vide s'il n'y a pas de fichiers dans le dossier
         int cpt = 0;
+        boolean dejaPrint = false;
+        System.out.println("Annotation des documents avec StanfordNLP...");
         for (File file : listOfFiles) {
             if (file.isFile()) {
-                BufferedReader br = new BufferedReader(new FileReader(new File(dir + "/" + file.getName())));
+                BufferedReader br = new BufferedReader(new FileReader(dataPath + "/" + file.getName()));
                 StringBuilder word = new StringBuilder();
                 String line;
                 while ((line = br.readLine()) != null) {
                     String newline = line.replaceAll("[^’'a-zA-Z0-9]", " ");
                     String finalline = newline.replaceAll("\\s+", " ").trim();
-                    // set up pipeline properties
                     Properties props = new Properties();
-                    // set the list of annotators to run
                     props.setProperty("annotators", "tokenize,pos,lemma");
-                    // set a property for an annotator, in this case the coref
-                    // annotator is being set to use the neural algorithm
                     props.setProperty("coref.algorithm", "neural");
-                    // Delete red lines on excecution
                     RedwoodConfiguration.current().clear().apply();
-                    // build pipeline
                     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-                    // create a document object
                     CoreDocument document = new CoreDocument(finalline);
-                    // annnotate the document
                     pipeline.annotate(document);
-                    //System.out.println(document.tokens());
                     for (CoreLabel tok : document.tokens()) {
-                        //System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
                         String str = String.valueOf(tok.lemma());
                         if (!(str.contains("'s") || str.contains("’s"))) {
                             word.append(str).append(" ");
@@ -152,28 +194,39 @@ public class Main {
                     }
                 }
                 String str = String.valueOf(word);
-                str = str.replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ").trim();
+                str = str.replaceAll("[^a-zA-Z0-9]"," ").replaceAll("\\s+"," ").trim();
 
                 processedTexts.add(str);
-                System.out.println("Annotation des documents; Progrès: " + Math.round((float) cpt / listOfFiles.length * 100) + "%");
+                //Afficheur de la progression
+                int progres = Math.round((float) cpt / listOfFiles.length * 100);
+                if (progres % 10 == 0 && progres > 0) {
+                    if (!dejaPrint) {
+                        System.out.println("Progrès: " + progres + "%");
+                        dejaPrint = true;
+                    }
+                }
+                else
+                    dejaPrint = false;
                 ++cpt;
             }
         }
+        System.out.println("Annotation des documents terminée!");
         return processedTexts;
     }
-
+    //Trouve tous les bigrammes pour le mot passé en paramètre dans le texte et compte les occurences dans la Map passé
+    //en paramètre
     static void trouverBigramme(WordMap<String, Integer> map, String[] texte, String mot){
         for (int i = 0; i < texte.length-1; i++) {
             if (texte[i].equals(mot)) {
                 String bi = texte[i + 1];
                 if (map.containsKey(bi))
-                    map.replace(bi, map.get(bi) + 1);
+                    map.put(bi, map.get(bi) + 1);
                 else
                     map.put(bi, 1);
             }
         }
     }
-
+    //Corrige les erreurs d'orthographe des requetes en trouvant le mot le plus proche
     static String trouverMotLePlusProche(List<String> mots, String mot) {
         if (mots.contains(mot))
             return mot;
@@ -192,64 +245,34 @@ public class Main {
         return motLePlusProche;
     }
     //Code pris de https://www.geeksforgeeks.org/java-program-to-implement-levenshtein-distance-computing-algorithm/
-    // DÉBUT DU PLAGIAT
-    static int compute_Levenshtein_distanceDP(String str1, String str2)
-    {
-        // A 2-D matrix to store previously calculated
-        // answers of subproblems in order
-        // to obtain the final
-
+    //Les 3 prochaines fonctions ont été pris du site cité en haut pour calculer la distance de Levenshtein
+    //Nous avons ajouté quelques modifications au code pour le rendre plus compact
+    //DÉBUT
+    static int compute_Levenshtein_distanceDP(String str1, String str2) {
         int[][] dp = new int[str1.length() + 1][str2.length() + 1];
-
         for (int i = 0; i <= str1.length(); i++)
         {
             for (int j = 0; j <= str2.length(); j++) {
-
-                // If str1 is empty, all characters of
-                // str2 are inserted into str1, which is of
-                // the only possible method of conversion
-                // with minimum operations.
-                if (i == 0) {
+                if (i == 0)
                     dp[i][j] = j;
-                }
-
-                // If str2 is empty, all characters of str1
-                // are removed, which is the only possible
-                //  method of conversion with minimum
-                //  operations.
-                else if (j == 0) {
+                else if (j == 0)
                     dp[i][j] = i;
-                }
-
                 else {
-                    // find the minimum among three
-                    // operations below
-
                     dp[i][j] = minm_edits(dp[i - 1][j - 1]
-                                    + NumOfReplacement(str1.charAt(i - 1),str2.charAt(j - 1)), // replace
-                            dp[i - 1][j] + 1, // delete
-                            dp[i][j - 1] + 1); // insert
+                                    + NumOfReplacement(str1.charAt(i - 1),str2.charAt(j - 1)),
+                            dp[i - 1][j] + 1, dp[i][j - 1] + 1);
                 }
             }
         }
-
         return dp[str1.length()][str2.length()];
     }
-
-    // check for distinct characters
-    // in str1 and str2
 
     static int NumOfReplacement(char c1, char c2) {
         return c1 == c2 ? 0 : 1;
     }
 
-    // receives the count of different
-    // operations performed and returns the
-    // minimum value among them.
-
-    static int minm_edits(int... nums)
-    {
+    static int minm_edits(int... nums) {
         return Arrays.stream(nums).min().orElse(Integer.MAX_VALUE);
     }
-    //END OF PLAGIAT
+    //FIN
 }

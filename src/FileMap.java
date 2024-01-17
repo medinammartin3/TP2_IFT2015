@@ -1,3 +1,9 @@
+//Auteurs:
+//Étienne Mitchell-Bouchard (20243430)
+//Martin Medina (20235219)
+
+//Inspiré des notes de cours sur les tables de hachages (5.2)
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedList;
@@ -13,8 +19,7 @@ public class FileMap<K,V> implements Map<K,V>{
         this.createTable();
     }
     public FileMap() {
-        this.capacity = 16;
-        this.createTable();
+        this (16);
     }
 
     public int size() { return n; }
@@ -22,6 +27,8 @@ public class FileMap<K,V> implements Map<K,V>{
     public boolean containsKey( K key ) {
         int hashValue = hashValue(key);
         LinkedList<Entry<K,V>> bucket = table[hashValue];
+        if (bucket == null)
+            return false;
         for (Entry<K,V> entry : bucket) {
             if (entry.getKey().equals(key)) {
                 return true;
@@ -118,7 +125,7 @@ public class FileMap<K,V> implements Map<K,V>{
         return buffer;
     }
 
-    // Code de hashage
+    // Code de hachage
     private int hashValue( K key ) {
         return Math.abs(key.hashCode()) % capacity;
     }

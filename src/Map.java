@@ -1,9 +1,12 @@
+//Pris tel quel des notes de cours sur les Maps (5.1)
+
 import java.lang.Iterable;
 
 public interface Map<K,V> {
     int size();
     boolean isEmpty();
     boolean containsKey( K key );
+
     V get( K key );
     V put( K key, V value );
     V remove( K key );
