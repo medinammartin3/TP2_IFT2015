@@ -13,7 +13,7 @@ Implementation of two types of Map to create a natural language processing progr
 * **Java Version :** OpenJDK version 20
 * **External libraries:** StanfordNLP ~ version 4.5.1
 
-## How run
+## How to run
 
 * **If you have downloaded the complete project:**
 	 1. To run the project, make sure you have an integrated development environment (IDE) installed.
