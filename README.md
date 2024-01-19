@@ -22,7 +22,7 @@ Implementation of two types of Map to create a natural language processing progr
 	
 * **If you've downloaded the .jar file:**
   * Open your computer's console, then write the following command: `java -jar NLP.jar`.
-  * Make sure you're in the same folder as your `.jar` file (use the "cd" command to navigate through your folders).
+  * Make sure you're in the same folder as your `.jar` file (use the `cd` command to navigate through your folders).
 
 The project already includes a few examples of possible entries and query:
 
@@ -62,7 +62,7 @@ Implémentation de deux types de Map afin de créer un programme de traitement d
 	
 * **Si vous avez téléchargé le fichier .jar :**
   * Ouvrez la console de votre ordinateur, ensuite écrivez la commande suivante : `java -jar NLP.jar`.
-  *Assurez-vous de bien être dans le dossier dans lequel vous avez placé votre fichier `.jar` (pour naviguer dans votre console utilisez la commande "cd").*
+  *Assurez-vous de bien être dans le dossier dans lequel vous avez placé votre fichier `.jar` (pour naviguer dans votre console utilisez la commande `cd`).*
 
 Le projet inclus déjà quelques exemples d'entrées et requête possibles :
 
