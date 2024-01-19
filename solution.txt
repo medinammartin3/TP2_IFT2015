@@ -1,26 +1,7 @@
-0.txt
-New York
-Los Angeles
-393.txt
-civil war
-763.txt
-hydrogen sulfide
-232.txt
-San Francisco
-209.txt
-307.txt
-340.txt
-comic book
-366.txt
-Stone Age
-74.txt
-120.txt
-blood flow
-fiber optics
-Abraham Lincoln
-104.txt
-coral reef
-63.txt
-67.txt
-junk food
-298.txt
+Best file for "planet" : Text3.txt | Score: 0.04644848929041303
+Best file for "coffee" : Text4.txt | Score: 0.05941986765501256
+Best file for "Frank Guarini" : Text4.txt | Score: 0.02970993382750628
+Most probable bigram of "the" : coffee
+Most probable bigram of "bill" : also
+Most probable bigram of "solar" : system
+INVALID COMMAND: bad command

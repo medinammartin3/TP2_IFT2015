@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    static final String dataPath = "dataset";
+    static final String dataPath = "Data";
     static final String queryPath = "query.txt";
     public static void main(String[] args){
         try {
@@ -61,6 +61,7 @@ public class Main {
             String ligne;
             while ((ligne = br.readLine()) != null) {
                 String[] s = ligne.split(" ");
+                String out;
                 //Requête de recherche
                 if (s[0].equals("search")) {
                     String fichierMax = "";
@@ -82,7 +83,7 @@ public class Main {
                             else if (TFIDF == score)
                                 fichierMax = plusPetitString(fichierMax, fichier);
                         }
-                        System.out.println(mot + ": " + fichierMax + " | Score: " + score);
+                        out = "Best file for \"" + mot + "\" : " + fichierMax + " | Score: " + score;
                     }
                     //Pour plusieurs mots
                     else {
@@ -112,9 +113,9 @@ public class Main {
                             else if (e.getValue() == max)
                                 fichierMax = plusPetitString(fichierMax, e.getKey());
                         }
-                        System.out.println(fichierMax + " | Score: " + max);
+                        out = "Best file for \"" + ligne.substring(7) + "\" : " +  fichierMax
+                                + " | Score: " + max;
                     }
-                    solutions.add(fichierMax);
                 }
                 //Bigrammes
                 else if (s[0].equals("the") && s[1].equals("most") && s[2].equals("probable") && s[3].equals("bigram")
@@ -136,12 +137,13 @@ public class Main {
                         else if (entry.getValue() == fois)
                             bigrammeMax = plusPetitString(bigramme, bigrammeMax);
                     }
-                    solutions.add(mot + " " + bigrammeMax);
-                    System.out.println(mot + " " + bigrammeMax);
+                    out = "Most probable bigram of \"" + mot + "\" : " + bigrammeMax;
                 }
                 else {
-                    System.out.println("Commande inconnue dans " + queryPath + ": " + ligne);
+                    out = "INVALID COMMAND: " + ligne;
                 }
+                System.out.println(out);
+                solutions.add(out);
             }
             br.close();
             //Écrire les solutions
