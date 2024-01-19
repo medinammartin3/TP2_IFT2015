@@ -61,8 +61,8 @@ Implémentation de deux types de Map afin de créer un programme de traitement d
 	3. Ensuite, lancez l'exécution du programme en cliquant sur le bouton correspondant dans l'IDE.
 	
 * **Si vous avez téléchargé le fichier .jar :**
-  * Ouvrez la console de votre ordinateur, ensuite écrivez la commande suivante : "java -jar NLP.jar".
-  *Assurez-vous de bien être dans le dossier dans lequel vous avez placé votre fichier .jar (pour naviguer dans votre console utilisez la commande "cd").*
+  * Ouvrez la console de votre ordinateur, ensuite écrivez la commande suivante : `java -jar NLP.jar`.
+  *Assurez-vous de bien être dans le dossier dans lequel vous avez placé votre fichier `.jar` (pour naviguer dans votre console utilisez la commande "cd").*
 
 Le projet inclus déjà quelques exemples d'entrées et requête possibles :
 
