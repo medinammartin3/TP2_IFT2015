@@ -21,8 +21,8 @@ Implementation of two types of Map to create a natural language processing progr
 	3. Then run the program by clicking on the corresponding button in the IDE.
 	
 * **If you've downloaded the .jar file:**
-  * Open your computer's console, then write the following command: "java -jar NLP.jar".
-  * Make sure you're in the same folder as your .jar file (use the "cd" command to navigate through your folders).
+  * Open your computer's console, then write the following command: `java -jar NLP.jar`.
+  * Make sure you're in the same folder as your `.jar` file (use the "cd" command to navigate through your folders).
 
 The project already includes a few examples of possible entries and query:
 
