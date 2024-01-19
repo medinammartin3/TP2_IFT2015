@@ -75,3 +75,12 @@ Le projet inclus déjà quelques exemples d'entrées et requête possibles :
 ## Crédits
 
 Ce projet ce projet est un travail pratique du cours IFT2015 (Structures de données). Il a été effectué en groupe avec [Étienne Mitchell-Bouchard](https://github.com/DarkZant).
+
+<br>
+
+```txt
+©  /\\/\//\//\
+  \|/|\|/|\|/|/
+ /|/|\|/|\|\’ .\
+ ‘`|_|————|_|———o
+```
