@@ -10,17 +10,18 @@ Implementation of two types of Map to create a natural language processing progr
 ## How to Install
 
 * Clone or download the project from this GitHub repository.
+* You can also just download `Jar` folder (wich contains the excecutable `.jar` file and input + query files.
 * **Java Version :** OpenJDK version 20
 * **External libraries:** StanfordNLP ~ version 4.5.1
 
 ## How to run
 
 * **If you have downloaded the complete project:**
-	 1. To run the project, make sure you have an integrated development environment (IDE) installed.
+	1. To run the project, make sure you have an integrated development environment (IDE) installed.
 	2. Open the IDE, import the project, then locate the class (Main) and the main method (main). 
 	3. Then run the program by clicking on the corresponding button in the IDE.
 	
-* **If you've downloaded the .jar file:**
+* **If you've downloaded `Jar` folder:**
   * Open your computer's console, then write the following command: `java -jar NLP.jar`.
   * Make sure you're in the same folder as your `.jar` file (use the `cd` command to navigate through your folders).
 
@@ -49,14 +50,14 @@ Implémentation de deux types de Map afin de créer un programme de traitement d
 ## Comment installer
 
 * Cloner ou télécharger le projet depuis ce dépôt GitHub.
-* Vous pouvez aussi simplement télécharger le fichier "NLP.jar".
+* Vous pouvez aussi simplement télécharger le dossier `Jar`.
 * **Version Java :** OpenJDK version 20
 * **Librairies externes :** StanfordNLP ~ version 4.5.1
 
 ## Comment exécuter
 
 * **Si vous avez téléchargé le projet au complet :**
-	 1. Pour exécuter le projet, assurez-vous d'avoir un environnement de développement intégré (IDE) installé.
+	1. Pour exécuter le projet, assurez-vous d'avoir un environnement de développement intégré (IDE) installé.
 	2. Ouvrez l'IDE, importez le projet, puis localisez la classe (Main) et la méthode principale (main). 
 	3. Ensuite, lancez l'exécution du programme en cliquant sur le bouton correspondant dans l'IDE.
 	
