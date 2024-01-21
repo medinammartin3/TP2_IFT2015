@@ -10,18 +10,18 @@ Implementation of two types of Map to create a natural language processing progr
 ## How to Install
 
 * Clone or download the project from this GitHub repository.
-* You can also just download `Jar.zip` file (wich contains the excecutable `NLP.jar` file and input + query files).
+* You can also just download `Jar.zip` file (which contains the excecutable `NLP.jar` file and input + query files).
 * **Java Version :** OpenJDK version 20
 * **External libraries:** StanfordNLP ~ version 4.5.1
 
 ## How to run
 
-* **If you have downloaded the complete project:**
+* **If you have downloaded the complete project :**
 	1. To run the project, make sure you have an integrated development environment (IDE) installed.
 	2. Open the IDE, import the project, then locate the class (Main) and the main method (main). 
 	3. Then run the program by clicking on the corresponding button in the IDE.
 	
-* **If you've downloaded `Jar.zip` file:**
+* **If you've downloaded `Jar.zip` file :**
   * Open your computer's console, then write the following command: `java -jar NLP.jar`.
   * Make sure you're in the same folder as your `.jar` file (use the `cd` command to navigate through your folders).
 
