@@ -3,6 +3,8 @@
 
 # Natural language processing program
 
+***Date :** Fall 2023*
+
 ## Description
 
 Implementation of two types of Map to create a natural language processing program that finds the most relevant document for a given user query (TFIDF).The program supports spelling errors (Levenshtein distance) and suggests the next most likely word that appears after a word given by the user.
@@ -42,6 +44,8 @@ ___
 <br>
 
 # Programme de traitement du langage naturel
+
+***Date :** Automne 2023*
 
 ## Description
 
